@@ -5,15 +5,9 @@ ${hstep0} ${eps} ${nprint}				##Record 3.0
 ${ranseed}						##Record 4
 ${ntraj} ${tflag1} ${tflag2} ${tflag3} ${tflag4}	##Record 5
 ${nmol} ${ezero}					##Record 6
-
-    ${natom} ${initx} ${initp} ${initj} ${ezero_i}	##Record 7
-    if initx == 0:					##Record 8.0
-        for j in range(natom):
-            ${target_mass_xyz} (${sym} ${mass} ${xx}
-    elif initp == 0:					##Record 9.0
-        ${temp0im} ${escale0im}
-    if initj == 0:
-        #nothing
+${natom} ${initx} ${initp} ${initj} ${ezeroi}		##Record 7
+${geom}
+${temp0im} ${escale0im}
 
 ${termflag} ${tnstep}				##Record 12
     if termflag == 0:

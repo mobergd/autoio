@@ -14,7 +14,7 @@ SUPPORTED_KEYS = {
                  'nmol', 'ezero'),
     'ag': ('natom', 'INITx', 'INITp', 'INITj',
            'ezeroi', 'geom'),
-    'collision': ('TERMFLAG', 'tnstep?', 'tgradmag',
+    'collision': ('TERMFLAG', 'tnstep', 'tgradmag',
                   'ioutput', 'ilist')
 }
 REQUIRED_KEYS = {
@@ -25,7 +25,7 @@ REQUIRED_KEYS = {
                  'nmol', 'ezero'),
     'ag': ('natom', 'INITx', 'INITp', 'INITj',
            'ezeroi', 'geom'),
-    'collision': ('TERMFLAG', 'tnstep?', 'tgradmag',
+    'collision': ('TERMFLAG', 'tnstep', 'tgradmag',
                   'ioutput', 'ilist')
 }
 

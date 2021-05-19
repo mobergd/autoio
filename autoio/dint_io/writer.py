@@ -3,7 +3,8 @@ Executes the automation part of DiNT
 """
 
 import os
-from mako.template import Template
+from ioformat import build_mako_str
+#from mako.template import Template
 
 
 # OBTAIN THE PATH TO THE DIRECTORY CONTAINING THE TEMPLATES #
@@ -12,11 +13,11 @@ TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 
 ########## Optimization ##########
 
-def dint_opt(potflag, nsurf0, nsurft, methflag, repflag, 
+def opt_input(potflag, nsurf0, nsurft, methflag, repflag, 
              intflag, hstep0, eps, nprint, ranseed, ntraj,
              tflag1, tflag2, tflag3, tflag4, nmol, ezero,
              natom, initx, initp, initj, ezeroi, geom,
-             termflag, tnstep?, tgradmag, ioutput, ilist):
+             termflag, tnstep, tgradmag, ioutput, ilist):
     """ writes the DiNT input file for an optimziation job """
 
     # Set the dictionary for the DiNT opt input file
@@ -45,25 +46,25 @@ def dint_opt(potflag, nsurf0, nsurft, methflag, repflag,
         'ezeroi': ezeroi,
         'geom': geom,
         'termflag': termflag,
-        'tnstep'?: tnstep,
+        'tnstep': tnstep,
         'tgradmag': tgradmag,
         'ioutput': ioutput,
         'ilist': ilist
     }
 
-    return build_mako_opt(
-        template_file_name='dint_opt.mako'
+    return build_mako_str(
+        template_file_name='dint_opt.mako',
         template_src_path=TEMPLATE_PATH,
         template_keys=inp_keys)
 
 
 ########## Sampling ##########
 
-def dint_samp(potflag, nsurf0, nsurft, methflag, repflag, 
+def samp_inp(potflag, nsurf0, nsurft, methflag, repflag, 
              intflag, hstep0, eps, nprint, ranseed, ntraj,
              tflag1, tflag2, tflag3, tflag4, nmol, ezero,
              natom, initx, initp, initj, ezeroi, geom,
-             termflag, tnstep?, tgradmag, ioutput, ilist):
+             termflag, tnstep, tgradmag, ioutput, ilist):
     """ writes the DiNT input file for an optimziation job """
 
     # Set the dictionary for the DiNT opt input file
@@ -92,24 +93,24 @@ def dint_samp(potflag, nsurf0, nsurft, methflag, repflag,
         'ezeroi': ezeroi,
         'geom': geom,
         'termflag': termflag,
-        'tnstep'?: tnstep,
+        'tnstep': tnstep,
         'tgradmag': tgradmag,
         'ioutput': ioutput,
         'ilist': ilist
     }
 
-    return build_mako_opt(
-        template_file_name='dint_opt.mako'
+    return build_mako_str(
+        template_file_name='dint_opt.mako',
         template_src_path=TEMPLATE_PATH,
         template_keys=inp_keys)
 
 ########## Trajectories ##########
 
-def dint_traj(potflag, nsurf0, nsurft, methflag, repflag, 
+def traj_inp(potflag, nsurf0, nsurft, methflag, repflag, 
              intflag, hstep0, eps, nprint, ranseed, ntraj,
              tflag1, tflag2, tflag3, tflag4, nmol, ezero,
              natom, initx, initp, initj, ezeroi, geom,
-             termflag, tnstep?, tgradmag, ioutput, ilist):
+             termflag, tnstep, tgradmag, ioutput, ilist):
     """ writes the DiNT input file for an optimziation job """
 
     # Set the dictionary for the DiNT opt input file
@@ -138,14 +139,14 @@ def dint_traj(potflag, nsurf0, nsurft, methflag, repflag,
         'ezeroi': ezeroi,
         'geom': geom,
         'termflag': termflag,
-        'tnstep'?: tnstep,
+        'tnstep': tnstep,
         'tgradmag': tgradmag,
         'ioutput': ioutput,
         'ilist': ilist
     }
 
-    return build_mako_opt(
-        template_file_name='dint_opt.mako'
+    return build_mako_str(
+        template_file_name='dint_opt.mako',
         template_src_path=TEMPLATE_PATH,
         template_keys=inp_keys)
 

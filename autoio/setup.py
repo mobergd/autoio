@@ -22,6 +22,7 @@ setup(
               'intder_io',
               'ioformat',
               'thermp_io',
+              'dint_io',
               'autoread',
               'autoread',
               'autoread._zmat',
@@ -37,6 +38,7 @@ setup(
         'intder_io': 'intder_io',
         'ioformat': 'ioformat',
         'thermp_io': 'thermp_io',
+        'dint_io': 'dint_io',
         'autoread': 'autoread',
         'autowrite': 'autowrite'},
     package_data={
@@ -56,5 +58,9 @@ setup(
         'varecof_io': ['writer/templates/*.mako',
                        'tests/data/*.txt'],
         'thermp_io': ['templates/*.mako'],
+        'dint_io': ['tests/opt/*dat',
+                    'tests/samp/*dat',
+                    'tests/traj/*dat',
+                    'templates/*.mako'],
         'chemkin_io': ['tests/data/*.txt', 'tests/data/*.csv']}
 )
