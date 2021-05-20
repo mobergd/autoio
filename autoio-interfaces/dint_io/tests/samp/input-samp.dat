@@ -1,17 +1,16 @@
 $run
-JobType		Opt
+JobType		Samp
 POTFLAG		2
 nsurf0		1
 nsurft		1
 METHFLAG	0
 REPFLAG		0
-INTFLAG		0
-hstep0		1.
-eps		1.d-6
-nprint		1
-RANSEED		80538343
+INTFLAG		1
+hstep		0.25
+nprint		100
+RANSEED		39175343
 ntraj		1
-TFLAG1		1
+TFLAG1		0
 TFLAG2		0
 TFLAG3		0
 TFLAG4		0
@@ -22,8 +21,8 @@ $end
 $ag
 natom		6
 INITx		0
-INITp		1
-INITj		0
+INITp		0
+INITj		1
 ezeroi		0.
 geom
 C                -0.02812963           0.72386574          -0.00000000
@@ -32,14 +31,22 @@ O                 0.88103041          -0.99139908           0.00000000
 H                -1.05549799           1.08802723          -0.00000000
 H                 0.48594566           1.08692129           0.88995314
 H                 0.48594566           1.08692129          -0.88995314
+temp0im		100
+escale0im	ENERGY
+samptarg	ENERGY
+sampjmin	0
+sampjmax	0
+sampjtemp1	0
+sampjtemp2	0
+sampbrot1	0
+sampbrot2	0
 $end
 
 $collision
-TERMFLAG	2
-tnstep		10000
-tgradmag	0.001
-ioutput		1
-ilist		77
+TERMFLAG	0
+tnstep		99900
+ioutput		2
+ilist		80 81
 $end
 
 $fortran_execution

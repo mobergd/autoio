@@ -10,13 +10,5 @@ ${geom}
 ${temp0im} ${escale0im}
 
 ${termflag} ${tnstep}				##Record 12
-    if termflag == 0:
-        #run for ${tnstep}
-    elif termflag == 1:				##Record 12.1
-        ${tstime}
-    elif termflag == 2:				##Record 12.2
-        ${tgradmag}
-    elif termflag == 3:				##Record 12.3
-        ${tnoutcome}
-        ${tsymb1} ${tsymb2} ${distcut}
-${ioutput} ${ilist1} ${ilist2} ..
+${tgradmag}
+${ioutput} ${ilist}

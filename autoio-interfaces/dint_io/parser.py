@@ -3,30 +3,31 @@
 
 import sys
 import ioformat
-
+import autoread.geom as apg
 
 # Required and Supported keywords for the input
 SUPPORTED_KEYS = {
     'run_info': ('POTFLAG', 'nsurf0', 'nsurft',
                  'METHFLAG', 'REPFLAG', 'INTFLAG',
-                 'hstep0', 'eps', 'nprint', 'ranseed',
+                 'hstep0', 'eps', 'hstep', 'nprint', 'ranseed',
                  'ntraj', 'TFLAG1', 'TFLAG2', 'TFLAG3', 'TFLAG4',
                  'nmol', 'ezero'),
     'ag': ('natom', 'INITx', 'INITp', 'INITj',
-           'ezeroi', 'geom'),
+           'ezeroi', 'geom', 'temp0im', 'escale0im', 'samptarg',
+           'sampjmin', 'sampjmax', 'sampjtemp1', 'sampjtemp2',
+           'sampbrot1', 'sampbrot2'),
     'collision': ('TERMFLAG', 'tnstep', 'tgradmag',
                   'ioutput', 'ilist')
 }
 REQUIRED_KEYS = {
     'run_info': ('POTFLAG', 'nsurf0', 'nsurft',
                  'METHFLAG', 'REPFLAG', 'INTFLAG',
-                 'hstep0', 'eps', 'nprint', 'ranseed',
+                 'nprint', 'ranseed',
                  'ntraj', 'TFLAG1', 'TFLAG2', 'TFLAG3', 'TFLAG4',
                  'nmol', 'ezero'),
     'ag': ('natom', 'INITx', 'INITp', 'INITj',
            'ezeroi', 'geom'),
-    'collision': ('TERMFLAG', 'tnstep', 'tgradmag',
-                  'ioutput', 'ilist')
+    'collision': ('TERMFLAG', 'ioutput', 'ilist')
 }
 
 # Defaults for keys that may be missing
