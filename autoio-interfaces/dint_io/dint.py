@@ -55,7 +55,7 @@ if JOB_TYPE == 'Opt':
         ioutput=COLL_DCT['ioutput'],
         ilist=COLL_DCT['ilist']
     )
-else if JOB_TYPE == 'Samp':
+elif JOB_TYPE == 'Samp':
     SAMP_INP_STR = dint_io.writer.samp_inp(
         potflag=RUN_DCT['POTFLAG'],
         nsurf0=RUN_DCT['nsurf0'],
