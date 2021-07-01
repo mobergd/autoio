@@ -34,6 +34,7 @@ H                 0.48594566           1.08692129          -0.88995314
 temp0im		100
 escale0im	ENERGY
 samptarg	ENERGY
+letot		F
 sampjmin	0
 sampjmax	0
 sampjtemp1	0

@@ -82,6 +82,7 @@ elif JOB_TYPE == 'Samp':
         temp0im=AG_DCT['temp0im'],
         escale0im=AG_DCT['escale0im'],
         samptarg=AG_DCT['samptarg'],
+        letot=AG_DCT['letot'],
         sampjmin=AG_DCT['sampjmin'],
         sampjmax=AG_DCT['sampjmax'],
         sampjtemp1=AG_DCT['sampjtemp1'],

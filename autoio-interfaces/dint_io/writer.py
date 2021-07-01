@@ -11,6 +11,7 @@ from ioformat import build_mako_str
 SRC_PATH = os.path.dirname(os.path.realpath(__file__))
 TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates')
 
+
 ########## Optimization ##########
 
 def opt_input(potflag, nsurf0, nsurft, methflag, repflag, 
