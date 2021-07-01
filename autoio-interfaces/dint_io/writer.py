@@ -60,11 +60,11 @@ def opt_input(potflag, nsurf0, nsurft, methflag, repflag,
 
 ########## Sampling ##########
 
-def samp_inp(potflag, nsurf0, nsurft, methflag, repflag, 
-             intflag, hstep0, eps, nprint, ranseed, ntraj,
-             tflag1, tflag2, tflag3, tflag4, nmol, ezero,
-             natom, initx, initp, initj, ezeroi, geom,
-             termflag, tnstep, tgradmag, ioutput, ilist):
+def samp_input(potflag, nsurf0, nsurft, methflag, repflag, 
+               intflag, hstep0, eps, nprint, ranseed, ntraj,
+               tflag1, tflag2, tflag3, tflag4, nmol, ezero,
+               natom, initx, initp, initj, ezeroi, geom,
+               termflag, tnstep, tgradmag, ioutput, ilist):
     """ writes the DiNT input file for an optimziation job """
 
     # Set the dictionary for the DiNT opt input file
@@ -113,11 +113,11 @@ def samp_inp(potflag, nsurf0, nsurft, methflag, repflag,
 
 ########## Trajectories ##########
 
-def traj_inp(potflag, nsurf0, nsurft, methflag, repflag, 
-             intflag, hstep0, eps, nprint, ranseed, ntraj,
-             tflag1, tflag2, tflag3, tflag4, nmol, ezero,
-             natom, initx, initp, initj, ezeroi, geom,
-             termflag, tnstep, tgradmag, ioutput, ilist):
+def traj_input(potflag, nsurf0, nsurft, methflag, repflag, 
+               intflag, hstep0, eps, nprint, ranseed, ntraj,
+               tflag1, tflag2, tflag3, tflag4, nmol, ezero,
+               natom, initx, initp, initj, ezeroi, geom,
+               termflag, tnstep, tgradmag, ioutput, ilist):
     """ writes the DiNT input file for an optimziation job """
 
     # Set the dictionary for the DiNT opt input file

@@ -3,7 +3,9 @@
 
 import sys
 import ioformat
-import autoread.geom as apg
+import autoparse.pattern as app
+import autoparse.find as apf
+import automol
 
 # Required and Supported keywords for the input
 SUPPORTED_KEYS = {
@@ -61,12 +63,61 @@ def input_file(inp_str):
 
     return run_dct, ag_dct, coll_dct
 
+
+def opt_geometry(output_str):
+    """ Read optimized geometry from DiNT output
+    """
+    "At the geometry"
+    ptt = app.padded(app.NEWLINE).join([
+        app.escape('At the geometry'),
+        '',
+        app.UNSIGNED_INTEGER,
+        (app.one_or_more(app.NONNEWLINE) + app.SPACES +
+         'Calculated rotational constants for this structure:'),
+        ''
+    ])
+
+    symbs, xyzs = ar.geom.read(
+        output_str,
+        start_ptt=ptt)
+    geom = automol.geom.from_data(symbs, xyzs, angstrom=True)
+
+    return geom
+
+
+def rot_consts(output_str):
+    """ Read symmetrized rotational constants from DiNT output
+    """
+    " Symmetrized to   0.65998994499494590       (x2) and    2.7235984942953118       cm-1"
+    rot_ptt = (app.SPACES + 'Symmetrized to' + app.SPACES + 
+                app.capturing(app.FLOAT) + app.SPACES + '(x2) and' +
+                app.SPACES + app.capturing(app.FLOAT) + app.SPACES + 'cm-1'
+
+    rot_cons = apf.all_captures(rot_ptt, output_str)
+    if rot_cons is not None:
+        rot_cons = tuple(float(val) for val in rot_cons)
+
+    return rot_cons
+
+def energy(output_str):
+    """ Read minimum energy from DiNT output
+    """
+    "Energy conservation"
+    " Converged to         =    -0.92274638E-02 eV"
+    pattern = (app.SPACES + 'Converged to' + app.SPACES + '=' +
+              app.capturing(app.FLOAT) + app.SPACES + 'eV'
+
+    energy = apf.first_capture(pattern, output_str)
+
+    return energy
+
 def _check_dcts(run_dct, ag_dct, coll_dct):
     """ Assess if the dicts are build correctly
     """
 
     chk_info = zip((run_dct, ag_dct, coll_dct),
                    ('training_data', 'functional_form', 'fortran_execution'))
+
     for dct, name in chk_info:
         # Assess if a required section was defined in the input
         if dct is None:

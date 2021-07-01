@@ -1,4 +1,4 @@
-""" Sets up DiNT input
+""" Standalone program to set up DiNT input
 """
 
 import os
@@ -25,7 +25,7 @@ JOB_TYPE = RUN_DCT['JobType']
 print('Writing to Fortran input file ...')
 
 if JOB_TYPE == 'Opt':
-    OPT_INP_STR = dint_io.writer.opt_inp(
+    OPT_INP_STR = dint_io.writer.opt_input(
         potflag=RUN_DCT['POTFLAG'],
         nsurf0=RUN_DCT['nsurf0'],
         nsurft=RUN_DCT['nsurft'],
@@ -56,7 +56,7 @@ if JOB_TYPE == 'Opt':
         ilist=COLL_DCT['ilist']
     )
 elif JOB_TYPE == 'Samp':
-    SAMP_INP_STR = dint_io.writer.samp_inp(
+    SAMP_INP_STR = dint_io.writer.samp_input(
         potflag=RUN_DCT['POTFLAG'],
         nsurf0=RUN_DCT['nsurf0'],
         nsurft=RUN_DCT['nsurft'],
