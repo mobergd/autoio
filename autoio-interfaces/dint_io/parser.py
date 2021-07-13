@@ -3,9 +3,9 @@
 
 import sys
 import ioformat
+import automol
 import autoparse.pattern as app
 import autoparse.find as apf
-import automol
 
 # Required and Supported keywords for the input
 SUPPORTED_KEYS = {
@@ -72,9 +72,8 @@ def opt_geometry(output_str):
         app.escape('At the geometry'),
         '',
         app.UNSIGNED_INTEGER,
-        (app.one_or_more(app.NONNEWLINE) + app.SPACES +
-         'Calculated rotational constants for this structure:'),
-        ''
+        (app.one_or_more(app.NEWLINE) + app.SPACES),
+        app.escape('Calculated rotational constants for this structure:')
     ])
 
     symbs, xyzs = ar.geom.read(
