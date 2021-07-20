@@ -38,14 +38,15 @@ REQUIRED_KEYS = {
 #}
 
 # Parse the input string
-def input_file(inp_str):
-    """ Parse the input string
+def input_file(input_file):
+    """ Parse the input file into defined blocks
     """
 
     # Parse the sections of the input into keyword-val dictionaries
-    run_block = ioformat.ptt.symb_block(inp_str, '$', 'run_info')
-    ag_block = ioformat.ptt.symb_block(inp_str, '$', 'ag')
-    coll_block = ioformat.ptt.symb_block(inp_str, '$', 'collision')
+    run_block = ioformat.ptt.symb_block(input_file, '$', 'run_info')
+    ag_block = ioformat.ptt.symb_block(input_file, '$', 'ag')
+    coll_block = ioformat.ptt.symb_block(input_file, '$', 'collision')
+    exec_block = ioformat.ptt.symb_block(input_file, '$', 'cl_exec')
 
     run_dct = ioformat.ptt.keyword_dct_from_block(
         run_block[1], formatvals=False)
@@ -53,15 +54,17 @@ def input_file(inp_str):
         ag_block[1], formatvals=False)
     coll_dct = ioformat.ptt.keyword_dct_from_block(
         coll_block[1], formatvals=False)
+    exec_dct = ioformat.ptt.keyword_dct_from_block(
+        exec_block[1], formatvals=False)
 
     # Set defaults (maybe use fancy version later if more defaults can be set)
 #    if 'Units' not in run_dct:
 #        run_dct['Units'] = DEFAULT_DCT['Units']
 
     # Check that the dictionaries are built correctly
-    _check_dcts(run_dct, ag_dct, coll_dct)
+    _check_dcts(run_dct, ag_dct, coll_dct, exec_dct)
 
-    return run_dct, ag_dct, coll_dct
+    return run_dct, ag_dct, coll_dct, exec_dct
 
 
 def opt_geometry(output_str):
@@ -91,6 +94,7 @@ def rot_consts(output_str):
     rot_ptt = (app.SPACES + 'Symmetrized to' + app.SPACES + 
                 app.capturing(app.FLOAT) + app.SPACES + '(x2) and' +
                 app.SPACES + app.capturing(app.FLOAT) + app.SPACES + 'cm-1'
+    )
 
     rot_cons = apf.all_captures(rot_ptt, output_str)
     if rot_cons is not None:
@@ -105,16 +109,17 @@ def energy(output_str):
     " Converged to         =    -0.92274638E-02 eV"
     pattern = (app.SPACES + 'Converged to' + app.SPACES + '=' +
               app.capturing(app.FLOAT) + app.SPACES + 'eV'
+    )
 
     energy = apf.first_capture(pattern, output_str)
 
     return energy
 
-def _check_dcts(run_dct, ag_dct, coll_dct):
+def _check_dcts(run_dct, ag_dct, coll_dct, exec_dct):
     """ Assess if the dicts are build correctly
     """
 
-    chk_info = zip((run_dct, ag_dct, coll_dct),
+    chk_info = zip((run_dct, ag_dct, coll_dct, exec_dct),
                    ('training_data', 'functional_form', 'fortran_execution'))
 
     for dct, name in chk_info:

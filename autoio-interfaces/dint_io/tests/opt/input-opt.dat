@@ -42,7 +42,7 @@ ioutput		1
 ilist		77
 $end
 
-$fortran_execution
+$cl_exec
 UseCL		F
 $end
 

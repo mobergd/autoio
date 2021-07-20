@@ -53,6 +53,8 @@ def opt_input(potflag, nsurf0, nsurft, methflag, repflag,
         'tgradmag': tgradmag,
         'ioutput': ioutput,
         'ilist': ilist
+#        'UseCL': usecl,
+#        'CommandLine': commandline
     }
 
     return build_mako_str(
@@ -187,33 +189,30 @@ def traj_input(potflag, nsurf0, nsurft, methflag, repflag,
     }
 
     return build_mako_str(
-        template_file_name='dint_opt.mako',
+        template_file_name='dint_traj.mako',
         template_src_path=TEMPLATE_PATH,
         template_keys=inp_keys)
 
 ### WIP
-def submission_script(drive_path, run_path, njobs):
-    """ launches the job """
+def submission_script(template_name, exe_path, run_dir):
+    """ launches the DiNT job """
 
     # Write the bottom of the string
-    job_exe_lines = '# Run several dint.x instances\n'
-    job_exe_lines += 'cd {0}/run1\n'.format(run_path)
-    job_exe_lines += 'time $DINTEXE < input.dat > output.dat &\n'
-    for i in range(njobs-1):
-        job_exe_lines += 'cd ../run{0}\n'.format(str(i+2))
-        job_exe_lines += 'time $DINTEXE < input.dat > output.dat &\n'
-    job_exe_lines += 'wait\n'
+    job_lines = '# Run several dint instances\n'
+    job_lines += 'cd {0}/run1\n'.format(run_dir)
+    job_lines += 'time $DINTEXE < dint.inp > output.dat &\n'
+#    for i in range(njobs-1):
+#        job_lines += 'cd ../run{0}\n'.format(str(i+2))
+#        job_lines += 'time $DINTEXE < dint.inp > output.dat &\n'
+    job_lines += 'wait\n'
 
     # Set the dictionary for the DiNT input file
-    fill_vals = {
-        "job_exe_lines": job_exe_lines,
+    exe_keys = {
+        "exe_path": exe_path,
+        "job_lines": job_lines
     }
 
-    # Set template name and path for the DiNT input file
-    template_file_name = 'submit.mako'
-    template_file_path = os.path.join(drive_path, template_file_name)
-
-    # Build the 1dmin input string
-    sub_str = Template(filename=template_file_path).render(**fill_vals)
-
-    return sub_str
+    return build_mako_str(
+        template_file_name=template_name,
+        template_src_path=TEMPLATE_PATH,
+        template_keys=exe_keys)
