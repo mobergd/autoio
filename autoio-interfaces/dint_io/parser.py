@@ -102,6 +102,7 @@ def rot_consts(output_str):
 
     return rot_cons
 
+
 def energy(output_str):
     """ Read minimum energy from DiNT output
     """
@@ -114,6 +115,20 @@ def energy(output_str):
     energy = apf.first_capture(pattern, output_str)
 
     return energy
+
+
+def alpha(output_str):
+    """ Read value of alpha from DiNT output
+    """
+
+    pattern = (app.SPACES + 'Converged to' + app.SPACES + '=' +
+              app.capturing(app.FLOAT) + app.SPACES + 'eV'
+    )
+
+    alpha = apf.first_capture(pattern, output_str)
+
+    return alpha
+
 
 def _check_dcts(run_dct, ag_dct, coll_dct, exec_dct):
     """ Assess if the dicts are build correctly

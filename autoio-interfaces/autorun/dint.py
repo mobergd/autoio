@@ -2,19 +2,19 @@
 
     STEPS:
         (1) optimize geometry
-        (2) sample initial coords of the unimol spc
-        (3) calculate lj params
+        (2) sample initial coords of the unimol species
+        (3) calculate lj params with OneDMin
         (4) run collision trajectories
         (5) calc moms
 
     Auxiliary input:
         from PIPPy: coef.dat, basis.dat
-        made by hand?: tinker files
+        made by hand: tinker files
 """
 
 import os
 import automol.geom
-import autorun.onedmin
+import onedmin
 import dint_io
 import onedmin_io
 from autorun._run import from_input_string
@@ -84,7 +84,8 @@ def read_input(run_dir, input_name):
             ioutput=COLL_DCT['ioutput'],
             ilist=COLL_DCT['ilist'],
             # Execution dictionary
-            UseCL=EXEC_DCT['UseCL']
+            UseCL=EXEC_DCT['UseCL'],
+            CommandLine=EXEC_DCT['CommandLine']
         )
     elif JOB_TYPE == 'Samp':
         print('Job type: Sampling')
@@ -129,7 +130,8 @@ def read_input(run_dir, input_name):
             ioutput=COLL_DCT['ioutput'],
             ilist=COLL_DCT['ilist'],
             # Execution dictionary
-            UseCL=EXEC_DCT['UseCL']
+            UseCL=EXEC_DCT['UseCL'],
+            CommandLine=EXEC_DCT['CommandLine']
         )
     elif JOB_TYPE == 'Traj':
         print('Job type: DiNT Trajectories')
@@ -187,44 +189,43 @@ def read_input(run_dir, input_name):
             ioutput=COLL_DCT['ioutput'],
             ilist=COLL_DCT['ilist'],
             # Execution dictionary
-            UseCL=EXEC_DCT['UseCL']
+            UseCL=EXEC_DCT['UseCL'],
+            CommandLine=EXEC_DCT['CommandLine']
         )
     else:
         print('Error: Job Type not supported')
         sys.exit()
 
-    return INP_STR
+    return INP_STR, JOB_TYPE
 
 
-def optimization(script_str, run_dir,
-                 geo, basis_str, coef_str):
+def optimization(run_dir, exe_path, geo, basis_str, coef_str):
     """ Optimize the geometry using DiNT.
         1. Read in unoptimized geo from xyz file
         2. Run dint.inp to get dint.opt
     """
 
     aux_dct = {
-        'basis.dat': basis_str,
-        'coef.dat': coef_str
-#        # 'tinker.xyz': tinker_xyz
+        "basis.dat": basis_str,
+        "coef.dat": coef_str
+#        'tinker.xyz': tinker_xyz
     }
 
-    input_name='dint.inp'
-    output_names=('dint.opt','fort.77')
+    input_name = 'dint.inp'
+    output_names = ('dint.opt','fort.77')
+    nprocs = 36 # Bebop
 
-    script_str=dint_io.writer.submission_script()
+    # Read Python input file to create dictionaries
+    inp_str, job_type = read_input(run_dir, input_name=input_name)
 
-    # Read input file to cr
-    inp_str = read_input(script_str, run_dir,
-                       aux_dct=aux_dct,
-                       input_name=input_name,
-                       output_names=output_names
-                       )
+    assert job_type == 'Opt'
 
-    assert JOB_TYPE is 'Opt'
-
-    # Create opt input file
+    # Create Fortran opt input file from dictionaries
     input_str = dint_io.writer.opt_input(inp_str)
+
+    # Create submission script
+    script_str = dint_io.writer.submission_script(nprocs, run_dir, exe_path, 
+                                                dint_in=input_name, dint_out=output_names[0])
 
     # Run DiNT, generate dint.opt
     output_strs = direct(script_str, run_dir, input_str,
@@ -240,8 +241,7 @@ def optimization(script_str, run_dir,
     return energy, rot_consts, opt_geo
 
 
-def sampling(script_str, run_dir,
-             geo, basis_str, coef_str):
+def sampling(script_str, run_dir, exe_path, geo, basis_str, coef_str):
     """ Sample the initial coordinates.
         1. Read in optimized geometry from dint.opt
         2. Run dint.inp for several geoms to get dint.samp
@@ -255,16 +255,19 @@ def sampling(script_str, run_dir,
 
     input_name='dint.inp'
     output_names=('dint.samp','fort.80','fort.81')
+    nprocs = 36 # Bebop
 
-    input = read_input(
-        script_str, run_dir, input_str,
-        aux_dct=aux_dct,
-        input_name=INPUT_NAME,
-        output_names=output_names
-    )
+    # Read Python input file to create dictionaries
+    inp_str, job_type = read_input(run_dir, input_name=input_name)
 
-    # Create sampling input file
-    dint_io.writer.samp_input(input)
+    assert job_type == 'Samp'
+
+    # Create Fortran sampling input file from dictionaries
+    input_str = dint_io.writer.samp_input(inp_str)
+
+    # Create submission script
+    script_str = dint_io.writer.submission_script(nprocs, run_dir, exe_path, 
+                                                dint_in=input_name, dint_out=output_names[0])
 
     # Run DiNT, generate dint.samp
     output_strs = direct(script_str, run_dir, input_str,
@@ -285,48 +288,53 @@ def brot():
     if os.path.exists('dint.brot'):
         print("Found dint.brot")
     else:
-        print("No dint.brot. Running brot.x")
-        input_strs = read_input(
-            script_str, run_dir, input_str,
-            input_name='fort.80',
-            output_names=('dint.brot')
-        )
+        print("No dint.brot found. Running brot.x")
+        input_strs = read_input(script_str, run_dir, input_str,
+                                input_name='fort.80',
+                                output_names=('dint.brot'))
 
     rot_consts = dint_io.parser.rot_consts(output_names)
 
-    return NotImplementedError
+    return rot_consts
 
 def calculate_lj():
     """ Run OneDMin to get LJ params
     """
-    onedmin_io.direct(
-    )
-    onedmin_io.lennard_jones_params(
-    )
+
+    onedmin_io.lennard_jones_params(sp_script_str, run_dir, nsamp, njobs,
+                                    tgt_geo, bath_geo, thy_info, charge, mult,
+                                    smin=2.0, smax=6.0, spin_method=1, ranseeds=None)
 
     return NotImplementedError
 
 
-def collision_trajectory():
+def collision_trajectory(script_str, run_dir, exe_path, geo, basis_str, coef_str, 
+                         dint_geo, dint_brot, dint_lj):
     """ Trajectory simulations
         1. Read in optimized geo from dint.geo
         2. Read in brot values from dint.brot
         3. Read in LJ values from dint.lj
         4. Run dint.inp to get dint.traj
     """
-    input = read_input(
-        script_str, run_dir, input_str,
-        aux_dct=aux_dct,
-        input_name=INPUT_NAME,
-        output_names=('dint.traj','fort.31')
-    )
+
+    aux_dct = {
+        'basis.dat': basis_str,
+        'coef.dat': coef_str
+#        # 'tinker.xyz': tinker_xyz
+    }
+
+    input_name='dint.inp'
+    output_names=('dint.traj','fort.31')
+    nprocs = 36 # Bebop
+
+    inp_str, job_type = read_input(run_dir, input_name=input_name)
 
     aux_dct = {
         'basis.dat': basis_str,
         'coef.dat': coef_str,
-        'dint.geo': dint.geo,
-        'dint.brot': dint.brot,
-        'dint.lj': dint.lj
+        'dint.geo': dint_geo,
+        'dint.brot': dint_brot,
+        'dint.lj': dint_lj
 #        # 'tinker.xyz': tinker_xyz
     }
 
@@ -341,25 +349,42 @@ def moments():
         2. Get rotationally averaged moments from mom.out
     """
 
+    direct()
+
     moment1 = 
     moment2 = 
 
     return moment1, moment2
 
 
-def alpha_calc():
-    """ Combines optimization, sampling, calculate_lj, 
+def alpha_calc(run_dir, exe_path, geo, basis_str, coef_str):
+    """ Combines optimization, sampling, brot, calculate_lj, 
         collision_trajectory, and moments to return
         alpha = <Del E_down>
     """
+    # Optimizes geometry and energy
+    energy, rot_consts, opt_geo = optimization(run_dir, exe_path,
+                                               geo, basis_str, coef_str)
 
+    # Samples unimolecular species
+    sampling(run_dir, exe_path, opt_geo, basis_str, coef_str)
 
+    # Run brot.x to get averaged rotational constants
+    brot(fort.80)
+
+    # Run OneDMin to get LJ values
+    calculate_lj()
 
     si = onedmin_io.reader.
     ep = onedmin_io.reader.
-    zlj = onedmin_io.reader.
 
-    alpha = dint_io.reader.summary(output_str)
+    # Use averaged rot consts, LJ values, and optimized min E in collision trajs
+    collision_trajectory()
+
+    # Calculate moments (alpha) from trajectory statistics
+    moments_out_str = moments()
+
+    alpha = dint_io.parser.alpha(moments_out_str)
 
     return alpha
 
@@ -367,7 +392,7 @@ def alpha_calc():
 def direct(script_str, run_dir, input_str, aux_dct=None,
            input_name=INPUT_NAME,
            output_names=OUTPUT_NAMES):
-    """
+    """ Runs executable
         :param aux_dct: auxiliary input strings dict[name: string]
         :type aux_dct: dict[str: str]
         :param script_str: string of bash script that contains
