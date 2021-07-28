@@ -54,8 +54,8 @@ def opt_input(potflag, nsurf0, nsurft, methflag, repflag,
         "ioutput": ioutput,
         "ilist": ilist
 	    # Execution dictionary
-#        'UseCL': usecl,
-#        'CommandLine': commandline
+#        "UseCL": usecl,
+#        "CommandLine": commandline
     }
 
     return build_mako_str(
@@ -116,8 +116,8 @@ def samp_input(potflag, nsurf0, nsurft, methflag, repflag,
         "ioutput": ioutput,
         "ilist": ilist
 	    # Execution dictionary
-#        'UseCL': usecl,
-#        'CommandLine': commandline
+#        "UseCL": usecl,
+#        "CommandLine": commandline
     }
 
     return build_mako_str(
@@ -193,14 +193,17 @@ def traj_input(potflag, nsurf0, nsurft, methflag, repflag,
         "ioutput": ioutput,
         "ilist": ilist
     	# Execution dictionary
-#        'UseCL': usecl,
-#        'CommandLine': commandline
+#        "UseCL": usecl,
+#        "CommandLine": commandline
     }
 
     return build_mako_str(
         template_file_name='dint_traj.mako',
         template_src_path=TEMPLATE_PATH,
         template_keys=inp_keys)
+
+
+def read_brot()
 
 
 def submission_script(njobs, run_dir, exe_path, dint_in, dint_out):

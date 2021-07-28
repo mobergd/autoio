@@ -279,7 +279,7 @@ def sampling(script_str, run_dir, exe_path, geo, basis_str, coef_str):
 
     return
 
-def brot():
+def brot(script_str, run_dir):
     """ 1. Check for a dint.brot file
         2. Generate dint.brot with brot.x from fort.80 if missing
         3. Read rotational constants from dint.brot
@@ -289,9 +289,17 @@ def brot():
         print("Found dint.brot")
     else:
         print("No dint.brot found. Running brot.x")
-        input_strs = read_input(script_str, run_dir, input_str,
-                                input_name='fort.80',
-                                output_names=('dint.brot'))
+        inp_str = read_input(script_str, run_dir, input_str,
+                                input_name='fort.80')
+
+    script_str = dint_io.writer.submission_script(nprocs, run_dir, exe_path, 
+                                                dint_in=input_name, dint_out=output_names[0])
+
+    # Run DiNT, generate dint.samp
+    output_strs = direct(script_str, run_dir, input_str,
+                         aux_dct=aux_dct,
+                         input_name=input_name,
+                         output_names='dint.brot')
 
     rot_consts = dint_io.parser.rot_consts(output_names)
 
@@ -319,7 +327,10 @@ def collision_trajectory(script_str, run_dir, exe_path, geo, basis_str, coef_str
 
     aux_dct = {
         'basis.dat': basis_str,
-        'coef.dat': coef_str
+        'coef.dat': coef_str,
+        'dint.geo': dint_geo,
+        'dint.brot': dint_brot,
+        'dint.lj': dint_lj
 #        # 'tinker.xyz': tinker_xyz
     }
 
@@ -329,16 +340,20 @@ def collision_trajectory(script_str, run_dir, exe_path, geo, basis_str, coef_str
 
     inp_str, job_type = read_input(run_dir, input_name=input_name)
 
-    aux_dct = {
-        'basis.dat': basis_str,
-        'coef.dat': coef_str,
-        'dint.geo': dint_geo,
-        'dint.brot': dint_brot,
-        'dint.lj': dint_lj
-#        # 'tinker.xyz': tinker_xyz
-    }
+    assert job_type == 'Traj'
 
-    dint_io.writer.traj_input(input)
+    # Create Fortran trajectory input file from dictionaries
+    input_str = dint_io.writer.traj_input(inp_str)
+
+    # Create submission script
+    script_str = dint_io.writer.submission_script(nprocs, run_dir, exe_path, 
+                                                dint_in=input_name, dint_out=output_names[0])
+
+    # Run DiNT, generate dint.traj
+    output_strs = direct(script_str, run_dir, input_str,
+                         aux_dct=aux_dct,
+                         input_name=input_name,
+                         output_names=output_names)
 
     return NotImplementedError
 
