@@ -21,10 +21,19 @@ from autorun._run import from_input_string
 
 # Name of input and output files
 INPUT_NAME = 'dint.inp'
-OUTPUT_NAMES = ('dint.opt','dint.samp','dint.traj')
+OUTPUT_NAMES = ('dint.geo','dint.samp','dint.traj')
 
 # autorun functions
 def read_input(run_dir, input_name):
+    """ Read in input parameters for dintmom job, runs series of
+        DiNT jobs.
+        Currently supports:
+            Optimization, Sampling, Collision trajectories
+
+
+    """
+
+def read_dint_input(run_dir, input_name):
     """ Read in input parameters for different DiNT jobs
         Currently supports:
             Optimization, Sampling, Collision trajectories
@@ -199,10 +208,10 @@ def read_input(run_dir, input_name):
     return INP_STR, JOB_TYPE
 
 
-def optimization(run_dir, exe_path, geo, basis_str, coef_str):
+def optimization(run_dir, exe_path, geofile, basis_str, coef_str):
     """ Optimize the geometry using DiNT.
         1. Read in unoptimized geo from xyz file
-        2. Run dint.inp to get dint.opt
+        2. Run dint.inp to get dint.geo
     """
 
     aux_dct = {
@@ -212,11 +221,14 @@ def optimization(run_dir, exe_path, geo, basis_str, coef_str):
     }
 
     input_name = 'dint.inp'
-    output_names = ('dint.opt','fort.77')
+    output_names = ('dint.geo','fort.77')
     nprocs = 36 # Bebop
 
+    #$cwd = pwd;
+    #chdir $cwd/opt;
+
     # Read Python input file to create dictionaries
-    inp_str, job_type = read_input(run_dir, input_name=input_name)
+    inp_str, job_type = read_dint_input(run_dir, input_name=input_name)
 
     assert job_type == 'Opt'
 
@@ -227,13 +239,22 @@ def optimization(run_dir, exe_path, geo, basis_str, coef_str):
     script_str = dint_io.writer.submission_script(nprocs, run_dir, exe_path, 
                                                 dint_in=input_name, dint_out=output_names[0])
 
-    # Run DiNT, generate dint.opt
+    # Run DiNT, generate dint.geo
     output_strs = direct(script_str, run_dir, input_str,
                          aux_dct=aux_dct,
                          input_name=input_name,
                          output_names=output_names)
 
-    # Parse values from dint.opt
+    #cp dint.geo ..
+    #chdir $cwd
+    
+    if os.file.exists('dint.geo'):
+        print('Geometry optimized!')
+    else:
+        print('Geometry optimization failed -- no dint.geo file was found!')
+        sys.exit()
+
+    # Parse values from dint.geo
     energy = dint_io.parser.energy(output_strs)
     rot_consts = dint_io.parser.rot_consts(output_strs)
     opt_geo = dint_io.parser.geo(output_strs)
@@ -241,10 +262,10 @@ def optimization(run_dir, exe_path, geo, basis_str, coef_str):
     return energy, rot_consts, opt_geo
 
 
-def sampling(script_str, run_dir, exe_path, geo, basis_str, coef_str):
+def sampling(run_dir, exe_path, geofile, basis_str, coef_str):
     """ Sample the initial coordinates.
-        1. Read in optimized geometry from dint.opt
-        2. Run dint.inp for several geoms to get dint.samp
+        1. Read in optimized geometry from dint.geo
+        2. Run dint.inp for several geoms to get xyz.dat
     """
 
     aux_dct = {
@@ -254,11 +275,11 @@ def sampling(script_str, run_dir, exe_path, geo, basis_str, coef_str):
     }
 
     input_name='dint.inp'
-    output_names=('dint.samp','fort.80','fort.81')
+    output_names=('xyz.dat','fort.80','fort.81')
     nprocs = 36 # Bebop
 
     # Read Python input file to create dictionaries
-    inp_str, job_type = read_input(run_dir, input_name=input_name)
+    inp_str, job_type = read_dint_input(run_dir, input_name=input_name)
 
     assert job_type == 'Samp'
 
@@ -275,11 +296,9 @@ def sampling(script_str, run_dir, exe_path, geo, basis_str, coef_str):
                          input_name=input_name,
                          output_names=output_names)
 
-    # Parse values from dint.samp
-
     return
 
-def brot(script_str, run_dir):
+def brot(run_dir):
     """ 1. Check for a dint.brot file
         2. Generate dint.brot with brot.x from fort.80 if missing
         3. Read rotational constants from dint.brot
@@ -288,18 +307,21 @@ def brot(script_str, run_dir):
     if os.path.exists('dint.brot'):
         print("Found dint.brot")
     else:
-        print("No dint.brot found. Running brot.x")
-        inp_str = read_input(script_str, run_dir, input_str,
-                                input_name='fort.80')
-
-    script_str = dint_io.writer.submission_script(nprocs, run_dir, exe_path, 
-                                                dint_in=input_name, dint_out=output_names[0])
-
-    # Run DiNT, generate dint.samp
-    output_strs = direct(script_str, run_dir, input_str,
-                         aux_dct=aux_dct,
-                         input_name=input_name,
-                         output_names='dint.brot')
+        #chdir "$cwd/samp"
+        if os.file.exists('fort.80'):
+            print("No dint.brot found. Running brot.x")
+            script_str = dint_io.writer.submission_script(nprocs, run_dir, exe_path, 
+                                dint_in=input_name, dint_out=output_names[0])
+            output_strs = direct(script_str, run_dir, input_str,
+                                aux_dct=aux_dct,
+                                input_name=input_name,
+                                output_names=output_names)
+        else:
+            print('Couldn\'t find sampled fort.80, exiting')
+            sys.exit()
+        
+        #qx ! cp dint.brot ..\/. !;
+        #chdir "$cwd" ;
 
     rot_consts = dint_io.parser.rot_consts(output_names)
 
@@ -316,7 +338,7 @@ def calculate_lj():
     return NotImplementedError
 
 
-def collision_trajectory(script_str, run_dir, exe_path, geo, basis_str, coef_str, 
+def collision_trajectory(run_dir, exe_path, geofile, basis_str, coef_str, 
                          dint_geo, dint_brot, dint_lj):
     """ Trajectory simulations
         1. Read in optimized geo from dint.geo
@@ -338,7 +360,7 @@ def collision_trajectory(script_str, run_dir, exe_path, geo, basis_str, coef_str
     output_names=('dint.traj','fort.31')
     nprocs = 36 # Bebop
 
-    inp_str, job_type = read_input(run_dir, input_name=input_name)
+    inp_str, job_type = read_dint_input(run_dir, input_name=input_name)
 
     assert job_type == 'Traj'
 
@@ -372,14 +394,14 @@ def moments():
     return moment1, moment2
 
 
-def alpha_calc(run_dir, exe_path, geo, basis_str, coef_str):
+def alpha_calc(run_dir, exe_path, geofile, basis_str, coef_str):
     """ Combines optimization, sampling, brot, calculate_lj, 
         collision_trajectory, and moments to return
         alpha = <Del E_down>
     """
     # Optimizes geometry and energy
     energy, rot_consts, opt_geo = optimization(run_dir, exe_path,
-                                               geo, basis_str, coef_str)
+                                               geofile, basis_str, coef_str)
 
     # Samples unimolecular species
     sampling(run_dir, exe_path, opt_geo, basis_str, coef_str)

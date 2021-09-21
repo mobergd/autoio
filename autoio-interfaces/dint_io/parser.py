@@ -103,6 +103,10 @@ def rot_consts(output_str):
     return rot_cons
 
 
+def read_brot():
+
+
+
 def energy(output_str):
     """ Read minimum energy from DiNT output
     """

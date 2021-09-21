@@ -203,8 +203,23 @@ def traj_input(potflag, nsurf0, nsurft, methflag, repflag,
         template_keys=inp_keys)
 
 
-def read_brot()
+def write_brot():
+    """ Writes dint.brot from fort.80 output from brot.x.
 
+        :param njobs: number of DiNT processes to run
+        :type njobs: int
+        :param template_name: name of mako template
+        :type template_name: str
+        :param run_dir: directory to run each DiNT process
+        :type run_dir: str
+        :param exe_path: full path to the DiNT executable
+        :type exe_path: str
+        :param dint_in: name of DiNT input file
+        :type dint_in: str
+        :param dint_out: name of DiNT output file
+        :type dint_out: str
+        :rtype: str
+    """
 
 def submission_script(njobs, run_dir, exe_path, dint_in, dint_out):
     """ Writes bash submission script for launching
